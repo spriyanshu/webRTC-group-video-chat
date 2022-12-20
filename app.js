@@ -1,9 +1,10 @@
 const express = require("express");
 const authRouter = require("./src/routes/authRoutes");
 const roomRouter = require("./src/routes/roomRoutes");
-const http = require("http");
+const https = require("https");
 const app = express();
 const path = require("path");
+const fs = require("fs");
 
 app.set("view engine", "ejs");
 app.set("views", "./src/views");
@@ -11,7 +12,13 @@ app.set("views", "./src/views");
 app.use(express.static("public"));
 
 app.use(express.json());
-const server = http.createServer(app);
+const server = https.createServer(
+  {
+    key: fs.readFileSync(path.join(__dirname, "cert", "key.pem")),
+    cert: fs.readFileSync(path.join(__dirname, "cert", "cert.pem")),
+  },
+  app
+);
 const io = require("socket.io")(server);
 
 io.on("connection", (socket) => {
